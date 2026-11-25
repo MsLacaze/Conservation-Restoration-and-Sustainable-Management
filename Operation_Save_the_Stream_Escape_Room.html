@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operation: Save the Stream</title>
+<style>
+:root{
+ --ink:#193b35;--deep:#123f36;--leaf:#477b55;--sage:#8eaa83;--mint:#e8f0e5;
+ --sand:#f5eedf;--gold:#d6aa54;--water:#b8d8d1;--paper:#fffdf7;--line:#cbd9ca;
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:16px/1.6 "Trebuchet MS",Arial,sans-serif;
+ background-color:#e9f0e7;
+ background-image:
+ radial-gradient(ellipse at 8% 12%,rgba(142,170,131,.18) 0 2px,transparent 3px),
+ radial-gradient(ellipse at 92% 35%,rgba(184,216,209,.25) 0 3px,transparent 4px);
+ background-size:34px 34px,46px 46px}
+header{position:relative;overflow:hidden;color:#fff;padding:42px max(5vw,22px) 38px;
+ background:linear-gradient(110deg,rgba(12,54,46,.97),rgba(39,94,68,.91)),
+ linear-gradient(180deg,#28634e,#123f36);border-bottom:8px solid var(--gold)}
+header:before{content:"";position:absolute;inset:0;opacity:.24;pointer-events:none;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 360'%3E%3Cpath d='M0 250 Q170 170 330 245 T660 220 T950 235 T1200 185 L1200 360 L0 360Z' fill='%2398b98c'/%3E%3Cpath d='M0 290 Q180 235 360 290 T720 270 T1200 260 L1200 360 L0 360Z' fill='%23b7d9d0'/%3E%3Cpath d='M0 320 Q190 275 390 320 T790 300 T1200 315' fill='none' stroke='%23e3f1e8' stroke-width='12' opacity='.8'/%3E%3C/svg%3E");
+ background-position:center bottom;background-size:cover}
+header>*{position:relative;z-index:1}
+header .tag{letter-spacing:2.2px;text-transform:uppercase;font-size:.78rem;color:#f4d991;font-weight:bold}
+h1{font-family:Georgia,serif;font-size:clamp(2.3rem,5vw,4.2rem);line-height:.98;letter-spacing:.02em;margin:12px 0;text-shadow:0 3px 12px #08251f88}
+header p{max-width:850px;font-size:1.08rem;color:#f0f5ec;margin-bottom:0}
+main{max-width:1100px;margin:25px auto;padding:0 16px 60px}
+.panel,.room{background:rgba(255,253,247,.97);border:1px solid var(--line);border-radius:18px;padding:24px;margin:20px 0;box-shadow:0 7px 22px rgba(24,61,48,.09)}
+.brief{border-left:7px solid var(--gold);background:linear-gradient(120deg,#fffaf0,#fffdf7)}
+h2{font-family:Georgia,serif;color:var(--deep);margin:0 0 12px;font-size:1.72rem}
+h3{font-family:Georgia,serif;margin:20px 0 7px;color:#285c48;font-size:1.2rem}
+.roomhead{display:flex;gap:14px;align-items:center;padding-bottom:14px;border-bottom:1px solid #dbe5d8;margin-bottom:16px}
+.badge{background:linear-gradient(145deg,#477b55,#123f36);color:white;border:3px solid #d6e4d2;border-radius:50%;width:52px;height:52px;display:grid;place-items:center;font-size:1.3rem;font-weight:bold;flex-shrink:0;box-shadow:0 3px 8px #123f3630}
+.lock{background:linear-gradient(135deg,#edf4e9,#e2eee7);border:2px dashed #7e9f83;padding:17px;border-radius:13px;margin-top:20px}
+label{display:block;font-weight:bold;margin:11px 0 5px}
+input,textarea,select{font:inherit;border:1px solid #a9bdab;border-radius:9px;padding:11px;width:100%;background:#fff;color:#193b35;min-height:44px}
+textarea{min-height:88px;resize:vertical}
+input:focus,textarea:focus,select:focus,button:focus-visible,a:focus-visible{outline:3px solid #d6aa54;outline-offset:2px}
+button{background:linear-gradient(135deg,#285f48,#123f36);color:white;border:0;border-radius:9px;padding:12px 18px;min-height:44px;font-weight:bold;font-size:1rem;cursor:pointer;margin:8px 6px 4px 0;box-shadow:0 3px 8px #123f3620}
+button:hover{background:linear-gradient(135deg,#397a58,#1b5141)}
+.feedback{font-weight:bold;margin-top:8px;min-height:24px}.good{color:#1b7547}.bad{color:#a33c2b}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.clue{background:linear-gradient(145deg,#f2f6ed,#eaf1e8);padding:15px;border-radius:12px;border:1px solid #d8e3d5;border-top:4px solid #789d73}
+.clue strong{color:#245640}
+.muted,small{color:#587064}
+a{color:#17624a;font-weight:bold;text-decoration-thickness:1px;text-underline-offset:3px}
+.room{display:none}.room.active{display:block}
+.progress{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0}
+.dot{padding:7px 12px;border-radius:30px;background:#e2eae0;border:1px solid #cfddce;font-size:.86rem;font-weight:bold;color:#365b48}
+.dot.done{background:#d2e9d2;color:#155638;border-color:#9fc7a5}
+.timer{float:right;background:#f6edda;border:1px solid #e4d4ad;border-radius:8px;padding:7px 12px;font-weight:bold;color:#6b5120}
+table{width:100%;border-collapse:collapse;margin:12px 0}
+td,th{border:1px solid #cbd8cc;padding:10px;text-align:left;vertical-align:top}
+th{background:#e5efe6;color:#214c3a}
+.final{background:linear-gradient(135deg,#174b3c,#12352f);color:white;border:2px solid #d6aa54}
+.final h2{color:#ffe29a}.hidden{display:none}
+input[type=checkbox]{width:19px;min-height:19px;vertical-align:middle;margin-right:7px;accent-color:#39785b}
+@media(max-width:600px){.timer{float:none;display:inline-block;margin:5px 0 12px}.panel,.room{padding:17px}header{padding:30px 20px}h1{font-size:2.5rem}td,th{padding:7px;font-size:.92rem}}
+@media(prefers-reduced-motion:no-preference){button{transition:background .18s ease,transform .18s ease}button:hover{transform:translateY(-1px)}}
+</style></head><body>
+<header><div class="tag">Year 10 Science · Freshwater ecosystems · Team investigation</div>
+<h1>OPERATION:<br>SAVE THE STREAM</h1>
+<p>A freshwater ecosystem is collapsing. You have been recruited as an environmental response team. Investigate the evidence, research real New Zealand solutions, make difficult decisions and unlock the final restoration plan.</p></header>
+<main>
+<section class="panel brief"><div class="timer">Suggested time: 55–70 minutes</div><h2>🚨 Emergency briefing: Te Awa Kōwhai</h2>
+<p>Te Awa Kōwhai is a fictional lowland stream in Aotearoa. It flows through farmland before reaching a wetland and joining a larger river. Over the past few years, the stream has become cloudy. Algae cover some slow-flowing sections, fewer aquatic insects are being found, and local people have reported fewer native fish.</p>
+<p><strong>Your mission:</strong> identify the causes, investigate the science, choose the most effective restoration actions and defend your decisions. You are not trying to guess what the teacher wants. You must use evidence.</p>
+<div class="grid"><div class="clue"><strong>Team roles</strong><br>Researcher · Evidence recorder · Ecologist · Strategy lead. Share the work; everyone must understand the decisions.</div>
+<div class="clue"><strong>Device rules</strong><br>Use your device to research. Use reliable sources such as DOC, NIWA / Earth Sciences NZ, Ministry for the Environment, councils and universities.</div>
+<div class="clue"><strong>Evidence rule</strong><br>For each room, record at least one useful source title or URL and explain what evidence you used. Copying a sentence is not an explanation.</div></div>
+<p><strong>How to play:</strong> Complete each investigation, enter the room code and submit your evidence notes. A correct code alone is not enough: you must also provide a research note to unlock the next room.</p>
+<label for="team">Team name</label><input id="team" placeholder="Choose your environmental response team name">
+<div class="progress"><span class="dot">Room 1 · The crime scene</span><span class="dot">Room 2 · Follow the pollution</span><span class="dot">Room 3 · Design the repair</span><span class="dot">Room 4 · The catchment dilemma</span><span class="dot">Final · Guardians of the stream</span></div></section>
+
+<section class="room active" id="room1"><div class="roomhead"><div class="badge">1</div><div><h2>The crime scene: What happened here?</h2><div class="muted">Your first job is to diagnose the ecosystem.</div></div></div>
+<p>Field officers have collected four clues. Decide what each clue suggests. Research turbidity, sedimentation, eutrophication and freshwater habitat loss.</p>
+<div class="grid"><div class="clue"><strong>Evidence A</strong><p>After heavy rain, the stream turns brown and cloudy. Fine particles settle between stones.</p></div><div class="clue"><strong>Evidence B</strong><p>A thick green algal growth appears in a slow-flowing section downstream of farmland.</p></div><div class="clue"><strong>Evidence C</strong><p>There are bare patches on the banks and cattle have direct access to the water.</p></div><div class="clue"><strong>Evidence D</strong><p>Stonefly larvae and other small aquatic invertebrates are becoming less common.</p></div></div>
+<h3>Investigation 1A — Match the evidence</h3>
+<label>Which process describes fine sediment settling onto the stream bed?</label><select id="r1q1"><option value="">Choose an answer</option><option value="sedimentation">Sedimentation</option><option value="abstraction">Water abstraction</option><option value="denitrification">Denitrification</option></select>
+<label>What is the term for excess nutrients causing algal growth and oxygen depletion?</label><select id="r1q2"><option value="">Choose an answer</option><option value="eutrophication">Eutrophication</option><option value="conservation">Conservation</option><option value="transpiration">Transpiration</option></select>
+<label>Give TWO ways sediment can harm stream organisms. Research if needed.</label><textarea id="r1explain" placeholder="Explain effects on habitat, eggs, gills, light or food webs..."></textarea>
+<h3>Investigation 1B — Build the case</h3><p>Which pair of human activities is the strongest explanation for the clues?</p>
+<select id="r1q3"><option value="">Choose the best explanation</option><option value="A">Removing streamside vegetation and allowing stock into the stream</option><option value="B">Planting native trees and fencing stream margins</option><option value="C">Monitoring water clarity and dissolved oxygen</option></select>
+<label>Research evidence: record one source and the useful information it gave you.</label><textarea id="r1source" placeholder="Source title / URL + what it helped you establish..."></textarea>
+<div class="lock"><strong>🔐 Room 1 lock</strong><p>Enter the three-digit code generated by your answers to Investigations 1A and 1B. The code follows the order of the three questions.</p><input id="code1" inputmode="numeric" maxlength="3" placeholder="3-digit code"><button onclick="unlock(1,'121','r1source')">Submit evidence & unlock Room 2</button><div id="fb1" class="feedback"></div></div></section>
+
+<section class="room" id="room2"><div class="roomhead"><div class="badge">2</div><div><h2>Follow the pollution: Trace the chain reaction</h2><div class="muted">A stream problem is rarely caused by one thing.</div></div></div>
+<p>Water tests downstream show elevated nitrate and phosphate levels. A week later, a large algal bloom develops. Soon after, dissolved oxygen drops and fish are found gasping near the surface.</p>
+<h3>Investigation 2A — Reconstruct the sequence</h3><p>Research eutrophication. Put the events in the correct order by entering the numbers 1–4.</p>
+<table><tr><th>Event</th><th>Order</th></tr><tr><td>Decomposer bacteria break down dead algae and use dissolved oxygen during respiration.</td><td><input id="seqA" type="number" min="1" max="4"></td></tr><tr><td>Excess nitrates and phosphates enter the water.</td><td><input id="seqB" type="number" min="1" max="4"></td></tr><tr><td>Algae multiply rapidly, forming a bloom.</td><td><input id="seqC" type="number" min="1" max="4"></td></tr><tr><td>Algae die; submerged plants may also die when light is blocked.</td><td><input id="seqD" type="number" min="1" max="4"></td></tr></table>
+<h3>Investigation 2B — Explain the oxygen crash</h3><label>Why do decomposer bacteria cause dissolved oxygen to fall after an algal bloom?</label><textarea id="r2why" placeholder="Explain what the bacteria are doing and why oxygen is used..."></textarea>
+<h3>Investigation 2C — Compare the evidence</h3><div class="grid"><div class="clue"><strong>Scenario X</strong><p>A stream is shallow, warm and slow-moving during summer because water is being pumped out for irrigation.</p></div><div class="clue"><strong>Scenario Y</strong><p>A stream is deep and shaded, with cool, fast-flowing water.</p></div></div>
+<label>Which stream is more likely to have lower dissolved oxygen, and why?</label><select id="r2q"><option value="">Choose</option><option value="X">Scenario X</option><option value="Y">Scenario Y</option></select>
+<label>Research source + one fact about water temperature, flow or dissolved oxygen.</label><textarea id="r2source" placeholder="Source title / URL + evidence..."></textarea>
+<div class="lock"><strong>🔐 Room 2 lock</strong><p>Enter the four-digit sequence that represents the correct order of events in the eutrophication process.</p><input id="code2" inputmode="numeric" maxlength="4" placeholder="4-digit code"><button onclick="unlock(2,'1234','r2source')">Submit evidence & unlock Room 3</button><div id="fb2" class="feedback"></div></div></section>
+
+<section class="room" id="room3"><div class="roomhead"><div class="badge">3</div><div><h2>Design the repair: Build a restoration strategy</h2><div class="muted">You have limited funding. Choose interventions that solve the actual problems.</div></div></div>
+<p>The council has approved a restoration budget, but it is not enough to do everything. Your team must design a practical package that tackles sediment, nutrients, temperature and habitat.</p>
+<h3>Investigation 3A — Research the tools</h3><div class="grid">
+<div class="clue"><strong>Riparian planting</strong><p>Vegetated margins alongside waterways.</p><a href="https://niwa.co.nz/freshwater-mitigation-systems/riparian-buffers" target="_blank">Research: Earth Sciences NZ / NIWA</a></div>
+<div class="clue"><strong>Wetland restoration</strong><p>Restoring waterlogged habitats and their filtering functions.</p><a href="https://www.doc.govt.nz/nature/habitats/wetlands/wetlands-protection/" target="_blank">Research: Department of Conservation</a></div>
+<div class="clue"><strong>Stock exclusion</strong><p>Keeping livestock away from waterways and wetland margins.</p><a href="https://environment.govt.nz/acts-and-regulations/freshwater-implementation-guidance/rivers-and-streams/" target="_blank">Research: Ministry for the Environment</a></div></div>
+<h3>Investigation 3B — Choose the best interventions</h3>
+<label>Problem 1: Bare banks are eroding and fine sediment is entering the stream.</label><select id="r3a"><option value="">Choose an intervention</option><option value="plant">Fence the margin and establish suitable native plants</option><option value="meter">Install irrigation water meters only</option><option value="sign">Put up signs asking people not to litter</option></select>
+<label>Problem 2: Nitrate-rich drainage water is flowing through a low-lying wet area.</label><select id="r3b"><option value="">Choose an intervention</option><option value="wetland">Protect or restore the wetland so water can pass slowly through wet soils</option><option value="concrete">Line the wet area with concrete</option><option value="deepen">Deepen the stream channel</option></select>
+<label>Problem 3: Cattle are trampling banks and depositing waste directly into the water.</label><select id="r3c"><option value="">Choose an intervention</option><option value="fence">Install stock-exclusion fencing and provide alternative stock access to water</option><option value="algae">Remove visible algae once a year</option><option value="shade">Plant trees only on the opposite side of the catchment</option></select>
+<label>Explain why your chosen actions should work. Include at least TWO scientific mechanisms (e.g. roots bind soil, shade cools water, denitrifying bacteria convert nitrate).</label><textarea id="r3why" placeholder="Justify the restoration package using cause-and-effect science..."></textarea>
+<label>Research source + one finding that influenced your choices.</label><textarea id="r3source" placeholder="Source title / URL + evidence..."></textarea>
+<div class="lock"><strong>🔐 Room 3 lock</strong><p>Enter the three-digit code generated by your three intervention decisions, in the order the problems are presented.</p><input id="code3" inputmode="numeric" maxlength="3" placeholder="3-digit code"><button onclick="unlock(3,'111','r3source')">Submit evidence & unlock Room 4</button><div id="fb3" class="feedback"></div></div></section>
+
+<section class="room" id="room4"><div class="roomhead"><div class="badge">4</div><div><h2>The catchment dilemma: Make the hard decisions</h2><div class="muted">A successful plan must work for the whole catchment, not just one patch.</div></div></div>
+<p>The catchment includes farms, a small town, a wetland and a stream used for recreation and mahinga kai. Farmers need water for production. Residents want clean water. Native species need healthy habitats. The council has funding for only three major actions this year.</p>
+<h3>Investigation 4A — Sort the management approaches</h3><p>Classify each action as <strong>Conservation</strong> (protect what is still healthy), <strong>Restoration</strong> (repair what has been damaged), or <strong>Sustainable management</strong> (manage use to reduce ongoing impacts).</p>
+<table><tr><th>Action</th><th>Your classification</th></tr><tr><td>Protect an unpolluted spring from development.</td><td><select id="s1"><option value="">Choose</option><option value="C">Conservation</option><option value="R">Restoration</option><option value="S">Sustainable management</option></select></td></tr><tr><td>Replant a cleared stream margin with suitable native vegetation.</td><td><select id="s2"><option value="">Choose</option><option value="C">Conservation</option><option value="R">Restoration</option><option value="S">Sustainable management</option></select></td></tr><tr><td>Use water meters and manage irrigation takes to protect minimum flows.</td><td><select id="s3"><option value="">Choose</option><option value="C">Conservation</option><option value="R">Restoration</option><option value="S">Sustainable management</option></select></td></tr></table>
+<h3>Investigation 4B — Choose your three priorities</h3><p>Choose exactly THREE actions for the first year. Think about which problems are most urgent and how actions work together.</p>
+<label><input type="checkbox" name="priority" value="fence" style="width:auto"> Fence livestock out of the stream and wetland.</label>
+<label><input type="checkbox" name="priority" value="riparian" style="width:auto"> Restore a diverse riparian buffer using plants suited to the site.</label>
+<label><input type="checkbox" name="priority" value="wetland" style="width:auto"> Protect and restore the wetland to filter nutrients and store stormwater.</label>
+<label><input type="checkbox" name="priority" value="monitor" style="width:auto"> Monitor water clarity, dissolved oxygen and aquatic invertebrates.</label>
+<label><input type="checkbox" name="priority" value="fertiliser" style="width:auto"> Improve fertiliser and nutrient budgeting to reduce losses from land.</label>
+<label><input type="checkbox" name="priority" value="signs" style="width:auto"> Put up signs asking people to care for the stream.</label>
+<label>Defend your three priorities. What would you do first, and why? Identify one possible limitation or trade-off.</label><textarea id="r4defend" placeholder="Consider ecological benefits, cost, time, land use and downstream effects..."></textarea>
+<label>Research source + evidence about catchment-wide management or monitoring.</label><textarea id="r4source" placeholder="Source title / URL + what you learned..."></textarea>
+<div class="lock"><strong>🔐 Room 4 lock</strong><p>Enter the three-digit classification code in the order shown in the table. Use the definitions and your research to classify each action.</p><input id="code4" inputmode="numeric" maxlength="3" placeholder="3-digit code"><button onclick="unlock(4,'123','r4source')">Submit evidence & unlock the final room</button><div id="fb4" class="feedback"></div></div></section>
+
+<section class="room" id="room5"><div class="roomhead"><div class="badge">★</div><div><h2>Final room: Guardians of the stream</h2><div class="muted">The final decision is not just scientific. It is about responsibility.</div></div></div>
+<p>Your team has been invited to present its plan to a community freshwater council. The council wants to know how your decisions reflect <strong>kaitiakitanga</strong> as well as ecological science.</p>
+<h3>Final investigation — The guardianship challenge</h3><p>Research kaitiakitanga in relation to freshwater. Consider wai as taonga, mauri, reciprocal responsibility and the role of mātauranga Māori alongside scientific monitoring. Explain how these ideas could influence real decisions.</p>
+<label>Which statement best describes kaitiakitanga in freshwater management?</label><select id="r5q"><option value="">Choose</option><option value="a">Water is mainly a resource to extract for economic gain.</option><option value="b">People have an active responsibility to care for waterways and maintain their health for future generations.</option><option value="c">Only scientists should make decisions about waterways.</option></select>
+<label>Write your team's final restoration recommendation (at least 5–7 sentences). Include the main causes, your chosen actions, the scientific reasons they work, how you will monitor recovery, and how kaitiakitanga informs your plan.</label><textarea id="finalplan" style="min-height:160px" placeholder="Our team recommends..."></textarea>
+<label>List TWO indicators you would monitor to check whether the stream is recovering, and explain what improvement you would expect to see.</label><textarea id="monitor" placeholder="For example: water clarity, dissolved oxygen, aquatic invertebrates, native fish..."></textarea>
+<label>Final research source(s) used by your team.</label><textarea id="finalsource" placeholder="List at least two credible sources and the evidence you used..."></textarea>
+<div class="lock"><strong>🔐 Final lock</strong><p>Enter the final three-digit code using the instructions in this room. Your team must also complete the written recommendation and monitoring evidence.</p><input id="code5" inputmode="numeric" maxlength="3" placeholder="3-digit code"><button onclick="finish()">Submit final plan</button><div id="fb5" class="feedback"></div></div></section>
+
+<section class="panel final hidden" id="victory"><h2>🎉 MISSION COMPLETE — THE STREAM HAS A FUTURE!</h2><p>Your team has investigated the causes of freshwater decline, used research to evaluate restoration strategies and developed a catchment plan grounded in ecological science and kaitiakitanga.</p><p><strong>Before you celebrate:</strong> show your teacher your research notes and final recommendation. Your team must be able to explain and defend its decisions.</p><button onclick="window.print()">Print / save your team's mission report</button></section>
+
+<section class="panel"><h2>Research base: reliable places to start</h2><p>Use these as starting points, not as the only sources. You may find more relevant evidence from your regional council, local iwi/hapū environmental groups, universities and research organisations.</p><ul>
+<li><a href="https://niwa.co.nz/freshwater-mitigation-systems/riparian-buffers" target="_blank">Earth Sciences New Zealand / NIWA — Riparian buffers</a></li>
+<li><a href="https://www.doc.govt.nz/nature/habitats/wetlands/wetlands-protection/" target="_blank">Department of Conservation — Wetlands protection and restoration</a></li>
+<li><a href="https://environment.govt.nz/publications/freshwater-interventions-literature-review/" target="_blank">Ministry for the Environment — Freshwater interventions literature review</a></li>
+<li><a href="https://niwa.co.nz/freshwater/kaitiaki-tools/what-impacts-interest-you/loss-riparian-vegetation/mitigation" target="_blank">Earth Sciences New Zealand / NIWA — Mitigating riparian vegetation loss</a></li>
+<li><a href="https://www.doc.govt.nz/about-us/statutory-and-advisory-bodies/nz-conservation-authority/policies/freshwater-principles/" target="_blank">Department of Conservation — Freshwater principles</a></li></ul></section>
+</main>
+<script>
+function showRoom(n){document.querySelectorAll('.room').forEach(r=>r.classList.remove('active'));document.getElementById('room'+n).classList.add('active');document.querySelectorAll('.dot').forEach((d,i)=>{if(i<n-1)d.classList.add('done')});window.scrollTo({top:0,behavior:'smooth'});}
+function say(id,msg,ok){const e=document.getElementById(id);e.textContent=msg;e.className='feedback '+(ok?'good':'bad');}
+function unlock(n,expected,sourceId){
+ const code=document.getElementById('code'+n).value.trim(),source=document.getElementById(sourceId).value.trim();
+ if(n===1&&(r1q1.value!=='sedimentation'||r1q2.value!=='eutrophication'||r1q3.value!=='A')){say('fb1','Not quite. Revisit the evidence and check your diagnosis.',false);return;}
+ if(n===2){if([seqA.value,seqB.value,seqC.value,seqD.value].join(',')!=='4,1,2,3'||r2q.value!=='X'){say('fb2','Your sequence or dissolved-oxygen comparison needs another look.',false);return;}}
+ if(n===3&&(r3a.value!=='plant'||r3b.value!=='wetland'||r3c.value!=='fence')){say('fb3','At least one intervention does not match the problem. Reconsider the science.',false);return;}
+ if(n===4&&(s1.value!=='C'||s2.value!=='R'||s3.value!=='S')){say('fb4','Check the difference between protecting, repairing and managing.',false);return;}
+ if(code!==expected){say('fb'+n,'The lock has not opened. Check the code instructions and your answers.',false);return;}
+ if(source.length<25){say('fb'+n,'You have the code, but your evidence log is too brief. Add a source title or URL and explain what you learned.',false);return;}
+ if(n===4&&document.querySelectorAll('input[name="priority"]:checked').length!==3){say('fb4','Choose exactly THREE priorities before you unlock this room.',false);return;}
+ say('fb'+n,'ACCESS GRANTED. Your evidence has been logged. Proceed to the next room.',true);showRoom(n+1);
+}
+function finish(){
+ if(r5q.value!=='b'){say('fb5','Reconsider what kaitiakitanga means in practice.',false);return;}
+ if(code5.value.trim()!=='225'){say('fb5','The final code is incorrect. Check the three parts of the code.',false);return;}
+ const plan=finalplan.value.trim(),mon=monitor.value.trim(),src=finalsource.value.trim();
+ if(plan.split(/[.!?]+/).filter(x=>x.trim().length>0).length<5||mon.length<35||src.length<25){say('fb5','Your final report needs at least five sentences, two explained monitoring indicators and research sources.',false);return;}
+ say('fb5','FINAL LOCK OPEN. Mission complete!',true);victory.classList.remove('hidden');victory.scrollIntoView({behavior:'smooth'});document.querySelectorAll('.dot').forEach(d=>d.classList.add('done'));
+}
+</script></body></html>
